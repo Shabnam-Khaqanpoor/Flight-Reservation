@@ -1,15 +1,17 @@
+import airport.Flight;
+import airport.Passenger;
+import exceptions.*;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
 
-         // *if you are using LocalDateTime, change the formatter for it.
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         LocalDate date = LocalDate.parse("13/02/2022", formatter);
 
@@ -23,14 +25,14 @@ public class Main {
         String name1 = sc.next();
         String name2 = sc.next();
 
-        String phone1 = sc.next();
-        String phone2 = sc.next();
+        String phone1 = null;
+        String phone2 = null;
 
-        String email1 = sc.next();
-        String email2 = sc.next();
+        String email1 = null;
+        String email2 = null;
+        double balance1 = 0;
+        double balance2 = 0;
 
-        double balance1 = sc.nextDouble();
-        double balance2 = sc.nextDouble();
 
         Passenger p1 = new Passenger(name1, phone1, email1, balance1);
         Passenger p2 = new Passenger(name2, phone2, email2, balance2);
@@ -38,78 +40,114 @@ public class Main {
         Passenger p4 = new Passenger("zahra", "989301112233", "abcgl.com", 3000d);
 
 
-        p1.reserveFlight(f1);
-        p1.reserveFlight(f2);
+        phone1 = sc.next();
+        managePhone(p1, phone1);
+        phone2 =  sc.next();
+        managePhone(p2, phone2);
 
-        p2.reserveFlight(f3);
-        p2.reserveFlight(f2);
 
-        p3.reserveFlight(f1);
-        p3.reserveFlight(f3);
+        email1 = sc.next();
+        manageEmail(p1,email1);
+        email2 = sc.next();
+        manageEmail(p2,email2);
 
-        p4.reserveFlight(f1);
-        p4.reserveFlight(f2);
+
+        balance1 = sc.nextDouble();
+        manageBalance(p1,balance1);
+        balance2 = sc.nextDouble();
+        manageBalance(p2,balance2);
+
+        managePhone(p3, p3.getPhoneNumber());
+        managePhone(p4, p4.getPhoneNumber());
+
+        manageEmail(p3,p3.getEmail());
+        manageEmail(p4, p4.getEmail());
+
+        manageBalance(p3,p3.getBalance());
+        manageBalance(p4,p4.getBalance());
+
+        management(p1, f1);
+        management(p1, f2);
+        management(p2, f3);
+        management(p2, f2);
+        management(p3, f1);
+        management(p3, f3);
+        management(p4, f1);
+        management(p4, f2);
+
 
     }
-}
 
-class Flight {
-    private LocalDate date;
-    private LocalTime time;
-    // or:
-    // private LocalDateTime dateTime;
-    private ArrayList<Passenger> passengers;
-    private String origin;
-    private String destination;
-    private double distance;
-    private int duration;
-    private int speed;
-    private double cost;
-    private int capacity;
-
-    public Flight(LocalDate date, LocalTime time, String origin, String destination,
-                  double distance, int duration, double cost, int capacity) {
-        //Exceptions?!!
-        //........
-    }
-    
-    // with LocalDateTime uncomment this constructor:
-//     public Flight(LocalDateTime dateTime, String origin, String destination,
-//                   double distance, int duration, double cost, int capacity) {
-//         //Exceptions?!!
-//         //........
-//     }
-}
-
-class Passenger {
-    private String name;
-    private String phoneNumber;
-    private String email;
-    private double balance;
-    private ArrayList<Flight> flights;
-
-    public Passenger(String name, String phoneNumber, String email, double balance) {
-        //........
+    public static void flightDetails(Flight flight) {
+        System.out.println("-------------------------------------------------");
+        System.out.println(flight.toString());
+        System.out.println("Passengers:");
+        for (Passenger passenger : flight.getPassengers()) {
+            System.out.println(passenger.toString());
+            System.out.println();
+        }
+        System.out.println("-------------------------------------------------");
     }
 
-    private void checkEmail(String email) {
-        //Exceptions!!!!
-        //........
+    public static void management(Passenger passenger, Flight flight) throws FailedReserve {
+        System.out.println("flight is reserving for " + passenger.getName());
+        try {
+            passenger.reserveFlight(flight);
+
+        } catch (SameOrginAndDestination sameOrginAndDestination) {
+            System.out.println(sameOrginAndDestination.toString());
+        } catch (SameTime sameTime) {
+            System.out.println(sameTime.toString());
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            System.out.println("It's full!");
+        } catch (NoBalance noBalance) {
+            System.out.println(noBalance.toString());
+        } finally {
+            flightDetails(flight);
+        }
     }
 
-    private void checkPhone(String phone) {
-        //Exceptions!!!!
-        //........
+    public static void manageBalance(Passenger passenger,double balance) {
+
+        try {
+            passenger.checkInitialBalance(balance);
+            passenger.setBalance(balance);
+        } catch (InputMismatchException inputMismatchException) {
+            System.out.println(inputMismatchException.getMessage());
+        } catch (WrongBalance wrongBalance) {
+            System.out.println(wrongBalance.toString());
+            passenger.setBalance(0);
+        } finally {
+            System.out.println("Balance Done!");
+        }
     }
 
-    private void checkInitialBalance(String balance) {
-        //Exceptions!!!!
-        //........
+    public static void manageEmail(Passenger passenger,String email) {
+        try {
+            passenger.checkEmail(email);
+            passenger.setEmail(email);
+        } catch (InputMismatchException inputMismatchException) {
+            System.out.println(inputMismatchException.getMessage());
+        } catch (WrongEmail wrongEmail) {
+            System.out.println(wrongEmail.toString());
+            passenger.setEmail(null);
+        } finally {
+            System.out.println("Email Done!");
+        }
     }
 
-    public void reserveFlight(Flight flight) {
-        //Exceptions!!!!
-        // تداخل ساعت - عدم موجودی کافی - تکمیل ظرفیت پرواز - یکسان بودن مبدا پرواز قبلی با مقصد پرواز جدید
-        //........
+    public static void managePhone(Passenger passenger, String phone) {
+        try {
+            passenger.checkPhone(phone);
+            passenger.setPhoneNumber(phone);
+        } catch (InputMismatchException inputMismatchException) {
+            System.out.println(inputMismatchException.getMessage());
+        } catch (WrongPhoneNumber wrongPhoneNumber) {
+            System.out.println(wrongPhoneNumber.toString());
+            passenger.setPhoneNumber(null);
+        } finally {
+            System.out.println("Phone number Done!");
+        }
     }
+
 }
