@@ -1,8 +1,4 @@
 
-Here's an updated version of the README with emojis for a more engaging presentation:
-
----
-
 # ✈️ **Airport Reservation System** 🛫
 
 ## Overview
